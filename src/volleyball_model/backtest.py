@@ -111,10 +111,22 @@ def evaluate_walk_forward(df: pd.DataFrame, date_col: str, target_col: str,
         raise ValueError("final_test_fraction must be in (0, .5)")
     all_dates = data[date_col].dt.normalize()
     unique_dates = np.array(sorted(all_dates.dropna().unique()))
-    holdout_days = max(1, int(np.ceil(len(unique_dates) * final_test_fraction)))
-    final_start = unique_dates[-holdout_days]
-    development_mask = (all_dates < final_start).to_numpy()
-    final_mask = ~development_mask
+    season_order = []
+    if "season" in data.columns and data["season"].notna().all():
+        season_order = sorted(data["season"].astype(str).unique(),
+                              key=lambda value: (0, int(value[:4])) if value[:4].isdigit() else (1, value))
+    if len(season_order) >= 3:
+        holdout_season_count = max(2, int(np.ceil(len(season_order) * final_test_fraction)))
+        final_seasons = season_order[-holdout_season_count:]
+        final_mask = data["season"].astype(str).isin(final_seasons).to_numpy()
+        split_method = "whole_seasons"
+    else:
+        holdout_days = max(1, int(np.ceil(len(unique_dates) * final_test_fraction)))
+        final_start = unique_dates[-holdout_days]
+        final_mask = (all_dates >= final_start).to_numpy()
+        final_seasons = []
+        split_method = "distinct_date_tail"
+    development_mask = ~final_mask
     final_test = data.loc[final_mask].copy().reset_index(drop=True)
     final_y = final_test[target_col].astype(int).to_numpy()
     data = data.loc[development_mask].copy().reset_index(drop=True)
@@ -177,14 +189,28 @@ def evaluate_walk_forward(df: pd.DataFrame, date_col: str, target_col: str,
         "match_date": final_dates.map(lambda value: value.isoformat()),
         "target": final_y, "probability": final_p,
     })
+    segment_cols = [column for column in ("competition_key", "sex", "season") if column in final_test.columns]
+    for column in segment_cols:
+        pred[column] = final_test[column].to_numpy()
     if baseline_col:
         pred["baseline_probability"] = pd.to_numeric(final_test[baseline_col], errors="coerce").to_numpy()
     summary = {"model": _metrics(final_y, final_p), "evaluated_rows": len(pred),
                "first_test_date": pred.match_date.min(), "last_test_date": pred.match_date.max(),
                "final_test_fraction": final_test_fraction,
+               "final_test_split_method": split_method,
+               "final_test_seasons": final_seasons,
                "development_walk_forward": development_summary}
     summary["model_intervals_95"] = _clustered_intervals(
         final_y, final_p, final_dates.dt.normalize().astype(str).to_numpy())
+    summary["segment_metrics"] = {}
+    for column in segment_cols:
+        segments = {}
+        for value, indices in final_test.groupby(column, dropna=False, sort=True).groups.items():
+            positions = np.asarray(list(indices), dtype=int)
+            label = str(value) if pd.notna(value) else "unknown"
+            segments[label] = {"n": int(len(positions)),
+                               "metrics": _metrics(final_y[positions], final_p[positions]) if len(positions) >= 20 else None}
+        summary["segment_metrics"][column] = segments
     if baseline_col:
         baseline_values = pred.baseline_probability.to_numpy(dtype=float)
         ok = np.isfinite(baseline_values)

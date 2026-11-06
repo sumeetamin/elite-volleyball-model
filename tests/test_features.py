@@ -2,7 +2,7 @@ import unittest
 
 import pandas as pd
 
-from volleyball_model.features import build_elo_features, rest_days, sequential_ewma
+from volleyball_model.features import build_elo_features, build_match_features, rest_days, sequential_ewma
 
 
 class RestDaysTests(unittest.TestCase):
@@ -69,6 +69,39 @@ class EloFeatureTests(unittest.TestCase):
 
         self.assertTrue(pd.isna(features.loc[1, "target_home_win"]))
         self.assertEqual(features.loc[1, "home_elo"], features.loc[2, "home_elo"])
+
+    def test_elo_histories_are_separate_by_gender(self):
+        matches = pd.DataFrame({
+            "competition_key": ["league", "league"],
+            "sex": ["M", "F"],
+            "match_date": pd.to_datetime(["2024-01-01", "2024-01-02"]),
+            "home_team": ["A", "A"],
+            "away_team": ["B", "B"],
+            "home_sets": [3, 0],
+            "away_sets": [0, 3],
+        })
+        features = build_elo_features(matches)
+        self.assertEqual(features.loc[1, "home_elo"], 1500.0)
+        self.assertEqual(features.loc[1, "away_elo"], 1500.0)
+
+
+class MatchFeatureTests(unittest.TestCase):
+    def test_same_date_games_share_prior_form_and_rest(self):
+        matches = pd.DataFrame({
+            "competition_key": ["league"] * 3,
+            "sex": ["M"] * 3,
+            "match_date": pd.to_datetime(["2024-01-01 12:00Z", "2024-01-02 10:00Z", "2024-01-02 20:00Z"]),
+            "home_team": ["A", "A", "A"],
+            "away_team": ["B", "B", "C"],
+            "home_sets": [3, 0, 0],
+            "away_sets": [0, 3, 3],
+        })
+        features = build_match_features(matches)
+        self.assertTrue(pd.isna(features.loc[0, "home_form_ewma"]))
+        self.assertEqual(features.loc[1, "home_form_ewma"], 1.0)
+        self.assertEqual(features.loc[2, "home_form_ewma"], 1.0)
+        self.assertEqual(features.loc[1, "home_rest_days"], 1.0)
+        self.assertEqual(features.loc[2, "home_rest_days"], 1.0)
 
 
 if __name__ == "__main__":

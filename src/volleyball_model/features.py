@@ -25,13 +25,16 @@ def build_elo_features(matches: pd.DataFrame, k_factor: float = 20.0,
     for column in ("competition_key", "home_team", "away_team"):
         if data[column].isna().any() or data[column].astype(str).str.strip().eq("").any():
             raise ValueError(f"{column} contains missing or blank values")
-    data = data.sort_values(["_date", "competition_key", "_position"])
+    data["_rating_scope"] = data["competition_key"].astype(str)
+    if "sex" in data.columns:
+        data["_rating_scope"] += "::" + data["sex"].fillna("unknown").astype(str)
+    data = data.sort_values(["_date", "_rating_scope", "_position"])
     output = pd.DataFrame(index=range(len(data)), columns=[
         "home_elo", "away_elo", "elo_diff", "elo_home_win_probability", "target_home_win"
     ])
     ratings: dict[tuple[str, str], float] = {}
 
-    for (date, competition), day in data.groupby(["_date", "competition_key"], sort=True):
+    for (date, competition), day in data.groupby(["_date", "_rating_scope"], sort=True):
         updates: dict[tuple[str, str], float] = {}
         for _, row in day.iterrows():
             home_key = (str(competition), str(row["home_team"]))
@@ -63,6 +66,70 @@ def build_elo_features(matches: pd.DataFrame, k_factor: float = 20.0,
     return output
 
 
+def build_match_features(matches: pd.DataFrame, k_factor: float = 20.0,
+                         home_advantage: float = 50.0, form_span: int = 5) -> pd.DataFrame:
+    """Build prior-only Elo, rest, and recent-win-form match features."""
+    if form_span < 1:
+        raise ValueError("form_span must be positive")
+    required = {"competition_key", "match_date", "home_team", "away_team", "home_sets", "away_sets"}
+    missing = required - set(matches.columns)
+    if missing:
+        raise ValueError(f"Missing required columns: {', '.join(sorted(missing))}")
+
+    base = matches.copy()
+    base["_row_position"] = range(len(base))
+    base["_rating_scope"] = base["competition_key"].astype(str)
+    if "sex" in base.columns:
+        base["_rating_scope"] += "::" + base["sex"].fillna("unknown").astype(str)
+    base["_home_team_key"] = base["_rating_scope"] + "::" + base["home_team"].astype(str)
+    base["_away_team_key"] = base["_rating_scope"] + "::" + base["away_team"].astype(str)
+
+    elo = build_elo_features(matches, k_factor, home_advantage)
+    home_schedule = base.rename(columns={"_home_team_key": "_team_key"})
+    away_schedule = base.rename(columns={"_away_team_key": "_team_key"})
+    home_rest = rest_days(home_schedule, "_team_key").to_numpy()
+    away_rest = rest_days(away_schedule, "_team_key").to_numpy()
+
+    events = []
+    for _, row in base.iterrows():
+        try:
+            hs, aws = int(row["home_sets"]), int(row["away_sets"])
+        except (TypeError, ValueError):
+            continue
+        if hs == aws or min(hs, aws) < 0 or max(hs, aws) != 3 or min(hs, aws) > 2:
+            continue
+        home_won = float(hs > aws)
+        position = int(row["_row_position"])
+        event_id = row.get("match_id", row.get("source_match_id", position))
+        date = row["match_date"]
+        events.append((position, event_id, date, row["_home_team_key"], home_won))
+        events.append((position, event_id, date, row["_away_team_key"], 1.0 - home_won))
+    event_frame = pd.DataFrame(events, columns=["_row_position", "match_id", "match_date", "_team_key", "win"])
+    form_by_position = {}
+    if not event_frame.empty:
+        event_frame["_form_prior"] = sequential_ewma(event_frame, "_team_key", "win", form_span)
+        home_keys = base["_home_team_key"].tolist()
+        away_keys = base["_away_team_key"].tolist()
+        for position, group in event_frame.groupby("_row_position", sort=False):
+            home_event = group[group["_team_key"].eq(home_keys[position])]
+            away_event = group[group["_team_key"].eq(away_keys[position])]
+            form_by_position[position] = (
+                home_event["_form_prior"].iloc[0] if not home_event.empty else float("nan"),
+                away_event["_form_prior"].iloc[0] if not away_event.empty else float("nan"),
+            )
+
+    features = elo.copy()
+    features["home_rest_days"] = home_rest
+    features["away_rest_days"] = away_rest
+    features["rest_days_diff"] = features["home_rest_days"] - features["away_rest_days"]
+    forms = [form_by_position.get(i, (float("nan"), float("nan"))) for i in range(len(base))]
+    features["home_form_ewma"] = [x[0] for x in forms]
+    features["away_form_ewma"] = [x[1] for x in forms]
+    features["form_diff"] = features["home_form_ewma"] - features["away_form_ewma"]
+    features.index = matches.index
+    return features
+
+
 def sequential_ewma(matches: pd.DataFrame, team_column: str, value_column: str, span: int) -> pd.Series:
     """Return prior-only EWMA aligned to rows; same-date matches see same prior state."""
     if span < 1:
@@ -77,7 +144,9 @@ def sequential_ewma(matches: pd.DataFrame, team_column: str, value_column: str, 
             prior = pd.Series(history, dtype="float64").ewm(span=span, adjust=False).mean().iloc[-1] if history else float("nan")
             out.loc[date_group.index] = prior
             # Update only after emitting every simultaneous fixture's prior.
-            history.extend(date_group[value_column].dropna().astype(float).tolist())
+            day_values = date_group[value_column].dropna().astype(float)
+            if not day_values.empty:
+                history.append(float(day_values.mean()))
     return out
 
 
