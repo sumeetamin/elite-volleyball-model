@@ -17,6 +17,7 @@ class SourceNormalizationTests(unittest.TestCase):
                 ("2004/05", "plusliga_m_2004_05_matches.csv", "1003256"),
                 ("2005/06", "plusliga_m_2005_06_matches.csv", "1004256"),
                 ("2006/07", "plusliga_m_2006_07_matches.csv", "1005256"),
+                ("2007/08", "plusliga_m_2007_08_matches.csv", "1006256"),
             ):
                 pd.DataFrame([{
                     "source": "official Polish league team-comparison archive",
@@ -30,11 +31,11 @@ class SourceNormalizationTests(unittest.TestCase):
                     "date_source_sha256": "def",
                 }]).to_csv(root / filename, index=False)
             matches, manifest = load_match_sources([root])
-        self.assertEqual(len(matches), 5)
-        self.assertEqual(set(matches.season), {"2001/02", "2003/04", "2004/05", "2005/06", "2006/07"})
+        self.assertEqual(len(matches), 6)
+        self.assertEqual(set(matches.season), {"2001/02", "2003/04", "2004/05", "2005/06", "2006/07", "2007/08"})
         self.assertTrue(matches.match_status.eq("completed").all())
         self.assertTrue(matches.date_source_url.eq("https://official.invalid/team").all())
-        self.assertEqual(sum("path" in item for item in manifest), 5)
+        self.assertEqual(sum("path" in item for item in manifest), 6)
 
     def test_cbv_official_page_team_ids_survive_normalization(self):
         row = pd.DataFrame([{
