@@ -24,6 +24,7 @@ def main() -> None:
     features.add_argument("--home-advantage", type=float, default=50.0)
     features.add_argument("--phase-column", default=None, help="optional phase field to filter before feature building")
     features.add_argument("--phase-value", default=None, help="required value when --phase-column is supplied")
+    features.add_argument("--as-of-date", default=None, help="drop rows after this UTC date (YYYY-MM-DD) before feature building")
     bt = sub.add_parser("backtest", help="evaluate binary match predictions with chronological folds")
     bt.add_argument("--input", required=True, help="CSV or Parquet feature table")
     bt.add_argument("--date", default="match_date")
@@ -45,6 +46,10 @@ def main() -> None:
             if args.phase_column not in matches.columns:
                 raise SystemExit(f"Phase column {args.phase_column!r} is not present in the input")
             matches = matches.loc[matches[args.phase_column].eq(args.phase_value)].copy()
+        if args.as_of_date:
+            cutoff = pd.Timestamp(args.as_of_date, tz="UTC") + pd.Timedelta(days=1)
+            dates = pd.to_datetime(matches["match_date"], utc=True, errors="coerce")
+            matches = matches.loc[dates < cutoff].copy()
         features = build_match_features(matches, args.k_factor, args.home_advantage)
         output = matches.drop(columns=features.columns.intersection(matches.columns)).join(features)
         target = Path(args.output)
