@@ -23,6 +23,24 @@ Date-cluster bootstrap 95% intervals for model-minus-Elo: accuracy [+0.0073, +0.
 
 Competition sample sizes are Brazil Superliga 628, CEV Champions League 49, Italy women's Serie A1 359, Italy SuperLega 275, PlusLiga 158, and VNL 668. The small CEV sample is noisy. The final test spans multiple seasons and tournament editions, but some individual segments remain small and reliability varies; do not infer that every competition is calibrated from the pooled ECE.
 
+Paired segment differences below are model minus Elo; negative log loss/Brier favors the model. These are descriptive and not separately multiplicity-adjusted.
+
+| Segment | n | Log-loss difference | Brier difference |
+|---|---:|---:|---:|
+| Brazil Superliga | 628 | -0.0115 | -0.0056 |
+| CEV Champions League | 49 | -0.0477 | -0.0251 |
+| Italy women's Serie A1 | 359 | -0.0573 | -0.0234 |
+| Italy SuperLega | 275 | -0.0266 | -0.0083 |
+| PlusLiga | 158 | -0.0200 | -0.0078 |
+| VNL (all editions) | 668 | +0.0037 | +0.0007 |
+| Domestic 2023/24 | 108 | +0.0312 | +0.0132 |
+| Domestic 2024/25 | 751 | -0.0167 | -0.0079 |
+| Domestic 2025/26 | 580 | -0.0483 | -0.0186 |
+| Domestic 2026/27 | 30 | -0.1149 | -0.0438 |
+| VNL 2024 | 208 | -0.0028 | -0.0010 |
+| VNL 2025 | 230 | -0.0002 | +0.0012 |
+| VNL 2026 | 230 | +0.0136 | +0.0017 |
+
 ## Acceptance status
 
 **Provisional model rating: 6/10; target ≥8/10 not met.** The model test suite passed 25/25 and the dataset suite passed 59/59 on 2026-11-07. Evidence supports improvement over same-row Elo in this retrospective sample, including date-cluster intervals for proper scores. Still missing: timestamp-aligned de-vigged odds comparison, a frozen prospective shadow evaluation, stronger season/competition stability evidence, and resolution or explicit disposition of uneven historical data coverage. The report is not a claim of independent replication.
