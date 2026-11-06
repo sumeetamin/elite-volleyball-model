@@ -4,10 +4,24 @@ from pathlib import Path
 
 import pandas as pd
 
-from volleyball_model.sources import _normalize_table, _parse_match_date, load_match_sources
+from volleyball_model.sources import _normalize_table, _parse_match_date, _season_from_cev, load_match_sources
 
 
 class SourceNormalizationTests(unittest.TestCase):
+    def test_ceV_match_date_outside_named_season_is_quarantined(self):
+        row = pd.DataFrame([{
+            "match_id": "CEV_4150", "season_name": "2000/01 EUROPEAN CHAMPIONS LEAGUE",
+            "gender": "M", "team_a": "A", "team_b": "B", "sets_a": 3,
+            "sets_b": 1, "match_status": "completed", "played_at_local": "24/01/2000 20:00",
+        }])
+        normalized = _normalize_table(row, Path("cev.csv"))
+        self.assertTrue(pd.isna(normalized.iloc[0]["match_date"]))
+
+    def test_ceV_final_year_title_maps_to_club_season(self):
+        self.assertEqual(_season_from_cev("2012 CEV Volleyball Champions League - Men"), "2011/12")
+        self.assertEqual(_season_from_cev("CEV XTB Champions League Volley 2027 | Men"), "2026/27")
+        self.assertEqual(_season_from_cev("2011 CEV Volleyball Cup"), "")
+
     def test_cancelled_fixture_with_stale_score_cannot_be_training_result(self):
         row = pd.DataFrame([{
             "competition_key": "brazil_superliga", "season": "2020/21", "sex": "M",

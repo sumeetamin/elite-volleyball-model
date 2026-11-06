@@ -54,7 +54,14 @@ def _fivb_lineage(row: pd.Series) -> tuple[str, str] | None:
 
 def _season_from_cev(value: object) -> str:
     match = re.search(r"\b(20\d{2})\s*/\s*(?:20)?(\d{2})\b", str(value))
-    return f"{match.group(1)}/{match.group(2)}" if match else ""
+    if match:
+        return f"{match.group(1)}/{match.group(2)}"
+    label = str(value)
+    edition = re.search(r"\b(20\d{2})\s+CEV\b|\bCEV\b.*\b(20\d{2})\b", label, re.IGNORECASE)
+    if edition and "champions league" in label.casefold():
+        end_year = int(edition.group(1) or edition.group(2))
+        return f"{end_year - 1}/{end_year % 100:02d}"
+    return ""
 
 
 def _parse_match_date(value: object) -> pd.Timestamp:
@@ -129,6 +136,15 @@ def _normalize_table(frame: pd.DataFrame, path: Path) -> pd.DataFrame:
             out[column] = ""
     out = out[CANONICAL_COLUMNS].copy()
     out["match_date"] = out["match_date"].map(_parse_match_date)
+    if {"season_name", "team_a", "team_b"} <= columns:
+        start_year = pd.to_numeric(out["season"].astype(str).str.extract(r"^(20\d{2})/")[0], errors="coerce")
+        match_year = out["match_date"].dt.year
+        in_club_season = (
+            (match_year.eq(start_year) & out["match_date"].dt.month.ge(7))
+            | (match_year.eq(start_year + 1) & out["match_date"].dt.month.le(6))
+        )
+        wrong_edition = match_year.notna() & start_year.notna() & ~in_club_season
+        out.loc[wrong_edition, "match_date"] = pd.NaT
     for column in ("home_sets", "away_sets", "home_advantage_points"):
         out[column] = pd.to_numeric(out[column], errors="coerce")
     valid_score = (
