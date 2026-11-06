@@ -25,7 +25,7 @@ Competition sample sizes are Brazil Superliga 628, CEV Champions League 49, Ital
 
 ## Acceptance status
 
-**Provisional model rating: 6/10; target ≥8/10 not met.** Evidence supports improvement over same-row Elo in this retrospective sample, including date-cluster intervals for proper scores. Still missing: timestamp-aligned de-vigged odds comparison, a frozen prospective shadow evaluation, stronger season/competition stability evidence, and resolution or explicit disposition of uneven historical data coverage. The report is not a claim of independent replication.
+**Provisional model rating: 6/10; target ≥8/10 not met.** The model test suite passed 25/25 and the dataset suite passed 59/59 on 2026-11-07. Evidence supports improvement over same-row Elo in this retrospective sample, including date-cluster intervals for proper scores. Still missing: timestamp-aligned de-vigged odds comparison, a frozen prospective shadow evaluation, stronger season/competition stability evidence, and resolution or explicit disposition of uneven historical data coverage. The report is not a claim of independent replication.
 
 ## Reproduction
 
