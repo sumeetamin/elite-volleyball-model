@@ -4,10 +4,20 @@ from pathlib import Path
 
 import pandas as pd
 
-from volleyball_model.sources import _parse_match_date, load_match_sources
+from volleyball_model.sources import _normalize_table, _parse_match_date, load_match_sources
 
 
 class SourceNormalizationTests(unittest.TestCase):
+    def test_cancelled_fixture_with_stale_score_cannot_be_training_result(self):
+        row = pd.DataFrame([{
+            "competition_key": "brazil_superliga", "season": "2020/21", "sex": "M",
+            "match_date": "2020-11-01", "home_team": "A", "away_team": "B",
+            "home_sets": 3, "away_sets": 1, "match_status": "cancelled",
+        }])
+        normalized = _normalize_table(row, Path("fixture.csv"))
+        self.assertEqual(normalized.iloc[0]["match_status"], "cancelled")
+        self.assertTrue(pd.isna(normalized.iloc[0]["home_sets"]))
+
     def test_supported_source_directory_maps_league_cev_and_fivb_rows(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)

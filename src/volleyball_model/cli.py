@@ -47,7 +47,13 @@ def main() -> None:
                 raise SystemExit(f"Phase column {args.phase_column!r} is not present in the input")
             matches = matches.loc[matches[args.phase_column].eq(args.phase_value)].copy()
         if args.as_of_date:
-            cutoff = pd.Timestamp(args.as_of_date, tz="UTC") + pd.Timedelta(days=1)
+            try:
+                cutoff_date = pd.Timestamp(args.as_of_date)
+            except (ValueError, TypeError) as exc:
+                raise SystemExit(f"Invalid --as-of-date: {exc}") from exc
+            if cutoff_date.tzinfo is not None or cutoff_date.strftime("%Y-%m-%d") != args.as_of_date:
+                raise SystemExit("--as-of-date must be a UTC calendar date in YYYY-MM-DD format")
+            cutoff = cutoff_date.tz_localize("UTC") + pd.Timedelta(days=1)
             dates = pd.to_datetime(matches["match_date"], utc=True, errors="coerce")
             matches = matches.loc[dates < cutoff].copy()
         features = build_match_features(matches, args.k_factor, args.home_advantage)
@@ -59,6 +65,7 @@ def main() -> None:
             "inputs": source_manifest,
             "normalized_rows": int(len(matches)),
             "completed_results": int(output["target_home_win"].notna().sum()),
+            "as_of_date_utc": args.as_of_date,
             "competition_season_counts": output.groupby(
                 ["competition_key", "sex", "season"], dropna=False
             ).size().rename("rows").reset_index().to_dict(orient="records"),

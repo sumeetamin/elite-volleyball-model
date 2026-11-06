@@ -136,7 +136,11 @@ def _normalize_table(frame: pd.DataFrame, path: Path) -> pd.DataFrame:
         & out[["home_sets", "away_sets"]].max(axis=1).eq(3)
         & out[["home_sets", "away_sets"]].min(axis=1).between(0, 2)
     )
-    out.loc[valid_score, "match_status"] = "completed"
+    explicit_non_results = out["match_status"].astype(str).str.casefold().isin(
+        {"cancelled", "canceled", "abandoned", "not_scheduled", "postponed", "walkover"}
+    )
+    out.loc[valid_score & ~explicit_non_results, "match_status"] = "completed"
+    out.loc[explicit_non_results, ["home_sets", "away_sets"]] = float("nan")
     out["sex"] = out["sex"].astype(str).str.upper().replace({"W": "F", "WOMEN": "F", "MEN": "M"})
     return out
 
