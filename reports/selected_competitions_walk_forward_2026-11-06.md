@@ -8,29 +8,29 @@ This report is generated from the local, provenance-preserving feature matrix af
 - Baseline: same-row Elo probability.
 - Same-date matches share the same prior state; domestic rows use 50 Elo home-advantage points and CEV/international rows use zero because their source ordering does not establish a home side.
 - Walk-forward development folds use a later calibration block. The final test is the latest 15% chronological date tail, with same-date grouping and a one-day embargo.
-- Final test: 1,395 paired predictions from 2024-04-01 through 2026-11-04. The realized fraction is 12.82% after filtering to completed outcomes and the as-of cutoff.
-- Feature matrix SHA-256: `fe43f4f9ab48a6cd6c7cfd0f4822870e3dead1e86bae7208d1fa6623a3a882b0`.
+- Final test: 2,070 paired predictions from 2024-01-11 through 2026-11-05. The realized fraction is 13.13% after filtering to completed outcomes and the as-of cutoff.
+- The source set includes PlusLiga 2001/02 (90 dated regular-season results), extending team rating histories. Feature matrix SHA-256: `d904a02409072ddbb4d2b9854bd7ccd1321189947b8b452166d853537a7114da`.
 
 ## Final test metrics
 
 | Metric | Model | Elo baseline | Difference |
 |---|---:|---:|---:|
-| Accuracy | 0.7254 | 0.7125 | +0.0129 |
-| Log loss | 0.5501 | 0.5582 | -0.0081 |
-| Brier score | 0.1851 | 0.1884 | -0.0033 |
-| ROC AUC | 0.7947 | 0.7901 | +0.0045 |
-| 10-bin ECE | 0.0481 | 0.0512 | -0.0031 |
+| Accuracy | 0.7246 | 0.7024 | +0.0222 |
+| Log loss | 0.5510 | 0.5674 | -0.0164 |
+| Brier score | 0.1855 | 0.1923 | -0.0068 |
+| ROC AUC | 0.7947 | 0.7860 | +0.0088 |
+| 10-bin ECE | 0.0387 | 0.0616 | -0.0229 |
 
-Date-cluster bootstrap 95% intervals for model minus Elo include zero for accuracy [-0.0044, 0.0309], log loss [-0.0196, 0.0032], Brier [-0.0079, 0.0014], and ECE [-0.0285, 0.0251]. The observed improvement is encouraging but not statistically conclusive.
+Date-cluster bootstrap 95% intervals for model minus Elo: accuracy [+0.0054, +0.0373], log loss [-0.0282, -0.0043], Brier [-0.0110, -0.0021], and ECE [-0.0430, +0.0036]. This expanded retrospective run shows consistent gains in accuracy and proper scores against Elo; it is a sensitivity update after adding historical data, not an untouched confirmation set.
 
 ## Acceptance status
 
-The model pipeline now has 17/17 passing tests in the project virtual environment, an explicit source/date cutoff, provenance manifests, chronological calibration, and a multi-competition final test. It still does not qualify for 8/10: the final test is retrospective, the proper-score intervals include zero, there is no timestamp-aligned bookmaker baseline, and historical source coverage is uneven across the 274-row scope ledger. Keep the quality rating provisional at 6/10 until a frozen, multi-period evaluation demonstrates stable proper-score gains and the remaining source gaps are resolved or formally dispositioned.
+The model pipeline has 22 passing tests, an explicit source/date cutoff, provenance manifests, chronological calibration, and a multi-competition final test. This does not yet qualify for 8/10: the evaluation is retrospective and no timestamp-aligned bookmaker baseline or prospective shadow test is available; historical source coverage is also uneven across the 274-row scope ledger. Keep the quality rating provisional at 6/10 until a frozen, multi-period evaluation demonstrates stable gains and the remaining source gaps are resolved or formally dispositioned.
 
 Reproduce the run with:
 
 ```powershell
 $env:PYTHONPATH = 'src'
-python -m volleyball_model.cli build-features --input ..\elite-volleyball-dataset\data\silver --as-of-date 2026-11-06 --output artifacts\selected_competitions_features.csv
-python -m volleyball_model.cli backtest --input artifacts\selected_competitions_features.csv --date match_date --target target_home_win --features elo_diff,home_advantage_points,rest_days_diff,form_diff,set_margin_diff --baseline elo_home_win_probability --output artifacts\selected_competitions_walk_forward_v3
+python -m volleyball_model.cli build-features --input ..\elite-volleyball-dataset\data\silver ..\elite-volleyball-dataset\data\local --as-of-date 2026-11-06 --output artifacts\selected_features_2026-11-06.csv
+python -m volleyball_model.cli backtest --input artifacts\selected_features_2026-11-06.csv --date match_date --target target_home_win --features elo_diff,home_advantage_points,rest_days_diff,form_diff,set_margin_diff --baseline elo_home_win_probability --output artifacts\selected_plusliga_2001_02_walk_forward_2026-11-06
 ```
