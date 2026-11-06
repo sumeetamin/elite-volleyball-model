@@ -129,7 +129,8 @@ def evaluate_walk_forward(df: pd.DataFrame, date_col: str, target_col: str,
     season_order = []
     if "season" in data.columns and data["season"].notna().all():
         season_order = sorted(data["season"].astype(str).unique(), key=_season_sort_key)
-    if len(season_order) >= 3:
+    multiple_competitions = "competition_key" in data and data["competition_key"].nunique() > 1
+    if len(season_order) >= 3 and not multiple_competitions:
         holdout_season_count = max(2, int(np.ceil(len(season_order) * final_test_fraction)))
         final_seasons = season_order[-holdout_season_count:]
         final_mask = data["season"].astype(str).isin(final_seasons).to_numpy()
@@ -179,6 +180,25 @@ def evaluate_walk_forward(df: pd.DataFrame, date_col: str, target_col: str,
     development_summary["model_intervals_95"] = _clustered_intervals(
         development_pred.target.to_numpy(), development_pred.probability.to_numpy(),
         pd.to_datetime(development_pred.match_date, utc=True).dt.normalize().astype(str).to_numpy())
+    if "baseline_probability" in development_pred:
+        baseline_values = development_pred.baseline_probability.to_numpy(dtype=float)
+        paired = np.isfinite(baseline_values)
+        if paired.any():
+            pair_y = development_pred.loc[paired, "target"].to_numpy()
+            pair_model = development_pred.loc[paired, "probability"].to_numpy()
+            pair_baseline = baseline_values[paired]
+            development_summary["paired_rows"] = int(paired.sum())
+            development_summary["model_on_baseline_rows"] = _metrics(pair_y, pair_model)
+            development_summary["baseline"] = _metrics(pair_y, pair_baseline)
+            development_summary["paired_model_minus_baseline"] = {
+                "accuracy_diff": development_summary["model_on_baseline_rows"]["accuracy"] - development_summary["baseline"]["accuracy"],
+                "log_loss_diff": development_summary["model_on_baseline_rows"]["log_loss"] - development_summary["baseline"]["log_loss"],
+                "brier_diff": development_summary["model_on_baseline_rows"]["brier"] - development_summary["baseline"]["brier"],
+                "ece_10_equal_width_diff": development_summary["model_on_baseline_rows"]["ece_10_equal_width"] - development_summary["baseline"]["ece_10_equal_width"],
+            }
+            dev_dates = pd.to_datetime(development_pred.loc[paired, "match_date"], utc=True).dt.normalize().astype(str).to_numpy()
+            development_summary["paired_difference_intervals_95"] = _paired_clustered_differences(
+                pair_y, pair_model, pair_baseline, dev_dates)
 
     development_dates = data[date_col].dt.normalize().drop_duplicates().sort_values().to_numpy()
     cal_n = max(1, int(len(development_dates) * calibration_fraction))

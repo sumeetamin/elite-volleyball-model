@@ -8,6 +8,7 @@ import sklearn
 from pathlib import Path
 import pandas as pd
 from .features import build_match_features
+from .sources import load_match_sources
 
 
 def main() -> None:
@@ -17,7 +18,7 @@ def main() -> None:
     sim.add_argument("--p-so-a", type=float, required=True)
     sim.add_argument("--p-so-b", type=float, required=True)
     features = sub.add_parser("build-features", help="build prior-only Elo, rest, and recent-form features")
-    features.add_argument("--input", required=True, help="normalized matches CSV")
+    features.add_argument("--input", required=True, nargs="+", help="one or more supported source CSVs or directories containing them")
     features.add_argument("--output", default="elo_features.csv")
     features.add_argument("--k-factor", type=float, default=20.0)
     features.add_argument("--home-advantage", type=float, default=50.0)
@@ -37,7 +38,7 @@ def main() -> None:
         for score, probability in match_probabilities(args.p_so_a, args.p_so_b).items():
             print(f"{score}: {probability:.6f}")
     elif args.command == "build-features":
-        matches = pd.read_csv(args.input)
+        matches, source_manifest = load_match_sources(args.input)
         if bool(args.phase_column) != bool(args.phase_value):
             raise SystemExit("--phase-column and --phase-value must be provided together")
         if args.phase_column:
@@ -45,10 +46,20 @@ def main() -> None:
                 raise SystemExit(f"Phase column {args.phase_column!r} is not present in the input")
             matches = matches.loc[matches[args.phase_column].eq(args.phase_value)].copy()
         features = build_match_features(matches, args.k_factor, args.home_advantage)
-        output = matches.join(features)
+        output = matches.drop(columns=features.columns.intersection(matches.columns)).join(features)
         target = Path(args.output)
         target.parent.mkdir(parents=True, exist_ok=True)
         output.to_csv(target, index=False)
+        manifest = {
+            "inputs": source_manifest,
+            "normalized_rows": int(len(matches)),
+            "completed_results": int(output["target_home_win"].notna().sum()),
+            "competition_season_counts": output.groupby(
+                ["competition_key", "sex", "season"], dropna=False
+            ).size().rename("rows").reset_index().to_dict(orient="records"),
+            "home_advantage_policy": "50 points for domestic home/away sources; 0 when source does not establish a true home side",
+        }
+        target.with_suffix(".manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
         print(f"Wrote {len(output)} rows with prior-only Elo features to {target}")
     elif args.command == "backtest":
         path=Path(args.input)

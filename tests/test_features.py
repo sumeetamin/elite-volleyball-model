@@ -38,6 +38,19 @@ class RestDaysTests(unittest.TestCase):
 
 
 class EloFeatureTests(unittest.TestCase):
+    def test_row_specific_home_advantage_is_zero_for_neutral_matches(self):
+        matches = pd.DataFrame({
+            "competition_key": ["international", "international"],
+            "match_date": pd.to_datetime(["2024-01-01", "2024-01-02"]),
+            "home_team": ["A", "A"], "away_team": ["B", "B"],
+            "home_sets": [3, 3], "away_sets": [0, 0],
+            "home_advantage_points": [0.0, 50.0],
+        })
+        features = build_elo_features(matches)
+        self.assertAlmostEqual(features.loc[0, "elo_home_win_probability"], 0.5)
+        self.assertGreater(features.loc[1, "elo_home_win_probability"], 0.5)
+        self.assertEqual(features.loc[0, "home_advantage_points"], 0.0)
+
     def test_same_day_results_do_not_change_same_day_ratings(self):
         matches = pd.DataFrame({
             "competition_key": ["league"] * 3,
@@ -100,6 +113,8 @@ class MatchFeatureTests(unittest.TestCase):
         self.assertTrue(pd.isna(features.loc[0, "home_form_ewma"]))
         self.assertEqual(features.loc[1, "home_form_ewma"], 1.0)
         self.assertEqual(features.loc[2, "home_form_ewma"], 1.0)
+        self.assertEqual(features.loc[1, "home_set_margin_ewma"], 3.0)
+        self.assertEqual(features.loc[2, "home_set_margin_ewma"], 3.0)
         self.assertEqual(features.loc[1, "home_rest_days"], 1.0)
         self.assertEqual(features.loc[2, "home_rest_days"], 1.0)
 

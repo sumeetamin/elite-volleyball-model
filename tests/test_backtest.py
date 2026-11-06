@@ -6,6 +6,19 @@ from volleyball_model.backtest import evaluate_walk_forward
 
 
 class FinalHoldoutTests(unittest.TestCase):
+    def test_mixed_competition_holdout_uses_one_global_chronological_tail(self):
+        dates = pd.date_range("2024-01-01", periods=60, freq="D", tz="UTC")
+        frame = pd.DataFrame({
+            "match_date": list(dates) * 2,
+            "target": [i % 2 for i in range(60)] * 2,
+            "signal": [float(i % 2) for i in range(60)] * 2,
+            "competition_key": ["league_a"] * 60 + ["league_b"] * 60,
+            "season": ["2024/25"] * 60 + ["VNL 2024"] * 60,
+        })
+        predictions, summary = evaluate_walk_forward(frame, "match_date", "target", ["signal"])
+        self.assertEqual(summary["final_test_split_method"], "distinct_date_tail")
+        self.assertEqual(set(frame.iloc[predictions.row_index].competition_key), {"league_a", "league_b"})
+
     def test_predictions_are_only_from_later_final_holdout(self):
         dates = pd.date_range("2024-01-01", periods=60, freq="D", tz="UTC")
         target = [i % 2 for i in range(len(dates))]
@@ -25,6 +38,7 @@ class FinalHoldoutTests(unittest.TestCase):
 
         self.assertEqual(set(predictions["fold"]), {"final_test"})
         self.assertGreater(predictions["match_date"].min(), summary["development_walk_forward"]["last_test_date"])
+        self.assertIn("paired_model_minus_baseline", summary["development_walk_forward"])
         self.assertEqual(summary["evaluated_rows"], len(predictions))
         self.assertIn("sex", summary["segment_metrics"])
         self.assertIn("season", predictions.columns)
