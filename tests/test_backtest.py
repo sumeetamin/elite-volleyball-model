@@ -46,6 +46,27 @@ class FinalHoldoutTests(unittest.TestCase):
         self.assertAlmostEqual(summary["realized_final_test_fraction"], 0.4)
         self.assertEqual(predictions["match_date"].min(), dates[90].isoformat())
 
+    def test_final_holdout_orders_competition_prefixed_seasons_by_embedded_year(self):
+        labels = [
+            "World League 2006", "World Grand Prix 2007", "World League 2008",
+            "World Grand Prix 2009", "VNL 2020", "VNL 2026",
+        ]
+        dates = [date for label in labels for date in pd.date_range(
+            f"{label[-4:]}-01-01", periods=30, freq="D", tz="UTC")]
+        frame = pd.DataFrame({
+            "match_date": dates,
+            "target": [i % 2 for i in range(len(dates))],
+            "signal": [float(i % 2) for i in range(len(dates))],
+            "season": [labels[i // 30] for i in range(len(dates))],
+        })
+
+        predictions, summary = evaluate_walk_forward(
+            frame, "match_date", "target", ["signal"]
+        )
+
+        self.assertEqual(summary["final_test_seasons"], ["VNL 2020", "VNL 2026"])
+        self.assertEqual(predictions["match_date"].min(), dates[120].isoformat())
+
 
 if __name__ == "__main__":
     unittest.main()

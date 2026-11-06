@@ -1,12 +1,27 @@
 """Leakage-aware expanding-window evaluation for precomputed match features."""
 from __future__ import annotations
 
+import re
+
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, brier_score_loss, log_loss, roc_auc_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
+
+
+def _season_sort_key(value: str) -> tuple[int, int, str]:
+    """Sort season labels chronologically by their first embedded four-digit year.
+
+    This supports both year-first labels (``2024/25``) and competition-prefixed
+    labels (``World League 2006`` or ``VNL 2026``). Labels without a year sort
+    before dated seasons; they remain deterministic through the lexical tie-break.
+    """
+    match = re.search(r"(?:19|20)\d{2}", value)
+    if match is None:
+        return (0, 0, value.casefold())
+    return (1, int(match.group()), value.casefold())
 
 
 def expanding_date_splits(dates: pd.Series, min_train_fraction: float = .5,
@@ -113,8 +128,7 @@ def evaluate_walk_forward(df: pd.DataFrame, date_col: str, target_col: str,
     unique_dates = np.array(sorted(all_dates.dropna().unique()))
     season_order = []
     if "season" in data.columns and data["season"].notna().all():
-        season_order = sorted(data["season"].astype(str).unique(),
-                              key=lambda value: (0, int(value[:4])) if value[:4].isdigit() else (1, value))
+        season_order = sorted(data["season"].astype(str).unique(), key=_season_sort_key)
     if len(season_order) >= 3:
         holdout_season_count = max(2, int(np.ceil(len(season_order) * final_test_fraction)))
         final_seasons = season_order[-holdout_season_count:]
