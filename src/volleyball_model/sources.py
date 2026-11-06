@@ -26,7 +26,7 @@ SUPPORTED_FILES = {
     "plusliga_m_2006_07_matches.csv",
     "plusliga_m_2007_08_matches.csv",
     "plusliga_m_2008_09_matches.csv", "plusliga_m_2009_10_matches.csv",
-    "plusliga_m_2010_11_matches.csv",
+    "plusliga_m_2010_11_matches.csv", "plusliga_m_2011_12_matches.csv",
 }
 
 
