@@ -29,6 +29,20 @@ class SourceNormalizationTests(unittest.TestCase):
         self.assertEqual(matches.iloc[0].date_source_url, "https://official.invalid/team")
         self.assertEqual(sum("path" in item for item in manifest), 1)
 
+    def test_cbv_official_page_team_ids_survive_normalization(self):
+        row = pd.DataFrame([{
+            "competition_key": "brazil_superliga", "season": "2025/26", "sex": "M",
+            "match_date": "2025-10-21", "home_team": "Team A", "away_team": "Team B",
+            "home_team_id": "2152471", "away_team_id": "2152472",
+            "home_sets": 3, "away_sets": 1, "match_status": "completed",
+            "source_match_id": "2252776", "date_source_url": "https://cbv.com.br/official",
+            "date_source_sha256": "abc",
+        }])
+        normalized = _normalize_table(row, Path("cbv_superliga_matches.csv"))
+        self.assertEqual(normalized.iloc[0].home_team_id, "2152471")
+        self.assertEqual(normalized.iloc[0].away_team_id, "2152472")
+        self.assertEqual(normalized.iloc[0].date_source_url, "https://cbv.com.br/official")
+
     def test_ceV_match_date_outside_named_season_is_quarantined(self):
         row = pd.DataFrame([{
             "match_id": "CEV_4150", "season_name": "2000/01 EUROPEAN CHAMPIONS LEAGUE",
