@@ -8,18 +8,18 @@ This report is generated from the local, provenance-preserving feature matrix af
 - Baseline: same-row Elo probability.
 - Same-date matches share the same prior state; domestic rows use 50 Elo home-advantage points and CEV/international rows use zero because their source ordering does not establish a home side.
 - Walk-forward development folds use a later calibration block. The final test is the latest 15% chronological date tail, with same-date grouping and a one-day embargo.
-- Final test: 2,092 paired predictions from 2024-03-17 through 2026-11-05. The realized fraction is 12.67% after filtering to completed outcomes and the as-of cutoff.
-- The source set includes PlusLiga 2001/02–2007/08 (90 dated regular-season results each) and CBV Superliga 2025/26 (132/132 men's and 131/132 women's results), extending team rating histories. This refreshed as-of feature matrix contains 18,336 rows and 18,236 completed outcomes; SHA-256: `cbf11af643c2a68db7160504fc732773e13f2330aba56bfcced4832137906307`.
+- Final test: 2,122 paired predictions from 2024-03-08 through 2026-11-05. The realized fraction is 12.72% after filtering to completed outcomes and the as-of cutoff.
+- The source set includes PlusLiga 2001/02–2009/10 (90 dated regular-season results each) and CBV Superliga 2025/26 (132/132 men's and 131/132 women's results), extending team rating histories. This refreshed as-of feature matrix contains 18,516 rows and 18,416 completed outcomes; SHA-256: `69050bff50fb061c1df2ae4a6d50c3061a4653f3ceb9d92fd403fcad2cf0a139`.
 
 ## Final test metrics
 
 | Metric | Model | Elo baseline | Difference |
 |---|---:|---:|---:|
-| Accuracy | 0.7251 | 0.6998 | +0.0253 |
-| Log loss | 0.5522 | 0.5722 | -0.0199 |
-| Brier score | 0.1859 | 0.1943 | -0.0084 |
-| ROC AUC | 0.7928 | 0.7845 | +0.0082 |
-| 10-bin ECE | 0.0281 | 0.0718 | -0.0436 |
+| Accuracy | 0.7238 | 0.7017 | +0.0221 |
+| Log loss | 0.5536 | 0.5722 | -0.0185 |
+| Brier score | 0.1864 | 0.1943 | -0.0078 |
+| ROC AUC | 0.7918 | 0.7837 | +0.0080 |
+| 10-bin ECE | 0.0288 | 0.0682 | -0.0393 |
 
 Date-cluster bootstrap 95% intervals for model minus Elo: accuracy [+0.0105, +0.0429], log loss [-0.0307, -0.0095], Brier [-0.0130, -0.0044], and ECE [-0.0589, -0.0149]. This expanded retrospective run shows gains against Elo across the reported metrics; it is a sensitivity update after adding historical data, not an untouched confirmation set.
 
