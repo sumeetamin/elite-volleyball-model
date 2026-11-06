@@ -17,6 +17,7 @@ SUPPORTED_FILES = {
     "cbv_superliga_matches.csv", "cev_champions_league_matches.csv",
     "cev_champions_league_matches_2000_2026_27.csv",
     "fivb_vis_matches.csv", "italy_superlega_m_2024_25.csv", "italy_superlega_matches_2000_2026.csv",
+    "italy_serie_a1_women_matches.csv",
     "plusliga_m_2024_25.csv", "plusliga_m_2000_01_head_to_head.csv",
 }
 

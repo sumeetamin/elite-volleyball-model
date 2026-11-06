@@ -42,6 +42,13 @@ class SourceNormalizationTests(unittest.TestCase):
                 "source_url": "https://official.invalid/m1", "source_sha256": "abc", "phase": "regular_season",
             }]).to_csv(root / "cbv_superliga_matches.csv", index=False)
             pd.DataFrame([{
+                "source_match_id": "w1", "competition_key": "italy_serie_a1_women",
+                "season": "2024/25", "sex": "F", "match_date": "2024-10-02",
+                "home_team": "Women A", "away_team": "Women B", "home_sets": 3,
+                "away_sets": 1, "status": "completed", "phase": "regular_season",
+                "source_url": "https://official.invalid/w1", "source_sha256": "sha",
+            }]).to_csv(root / "italy_serie_a1_women_matches.csv", index=False)
+            pd.DataFrame([{
                 "match_id": "CEV_1", "season_name": "2000/01 EUROPEAN CHAMPIONS LEAGUE WOMEN",
                 "gender": "W", "team_a": "C", "team_b": "D", "sets_a": 3, "sets_b": 2,
                 "match_status": "completed", "played_at_local": "05/12/2000 20:00",
@@ -62,7 +69,7 @@ class SourceNormalizationTests(unittest.TestCase):
 
             matches, manifest = load_match_sources([root])
 
-        self.assertEqual(len(matches), 3)
+        self.assertEqual(len(matches), 4)
         cev = matches.loc[matches.competition_key.eq("cev_cl")].iloc[0]
         self.assertEqual(cev.sex, "F")
         self.assertEqual(cev.season, "2000/01")
@@ -74,7 +81,8 @@ class SourceNormalizationTests(unittest.TestCase):
         domestic = matches.loc[matches.competition_key.eq("brazil_superliga")].iloc[0]
         self.assertEqual(domestic.home_advantage_points, 50.0)
         self.assertEqual(domestic.source_url, "https://official.invalid/m1")
-        self.assertEqual(sum("path" in item for item in manifest), 3)
+        self.assertEqual(sum("path" in item for item in manifest), 4)
+        self.assertEqual(len(matches.loc[matches.competition_key.eq("italy_serie_a1_women")]), 1)
         quality = next(item["normalization_quality"] for item in manifest if "normalization_quality" in item)
         self.assertEqual(quality["rows_without_timestamp_dropped"], 1)
 
