@@ -75,7 +75,7 @@ def main() -> None:
         print(f"Wrote {len(output)} rows with prior-only Elo features to {target}")
     elif args.command == "backtest":
         path=Path(args.input)
-        df=pd.read_parquet(path) if path.suffix.lower()==".parquet" else pd.read_csv(path)
+        df=pd.read_parquet(path) if path.suffix.lower()==".parquet" else pd.read_csv(path, low_memory=False)
         input_sha256 = hashlib.sha256(path.read_bytes()).hexdigest()
         predictions, summary=evaluate_walk_forward(df,args.date,args.target,
             [c.strip() for c in args.features.split(",") if c.strip()],args.baseline,

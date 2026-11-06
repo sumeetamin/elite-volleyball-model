@@ -40,6 +40,7 @@ class SourceNormalizationTests(unittest.TestCase):
                 "season": "2024/25", "sex": "F", "match_date": "2024-10-01", "home_team": "A",
                 "away_team": "B", "home_sets": 3, "away_sets": 1, "match_status": "completed",
                 "source_url": "https://official.invalid/m1", "source_sha256": "abc", "phase": "regular_season",
+                "date_source_url": "https://official.invalid/roster", "date_source_sha256": "xyz",
             }]).to_csv(root / "cbv_superliga_matches.csv", index=False)
             pd.DataFrame([{
                 "source_match_id": "w1", "competition_key": "italy_serie_a1_women",
@@ -56,14 +57,14 @@ class SourceNormalizationTests(unittest.TestCase):
             }]).to_csv(root / "cev_champions_league_matches.csv", index=False)
             pd.DataFrame([
                 {"match_id": "FIVB_VIS_1", "competition_name": "FIVB Men's World League 2006", "edition_year": 2006,
-                 "gender": "M", "team_a_name": "E", "team_b_name": "F", "sets_a": 3, "sets_b": 0,
+                 "gender": "M", "team_a_id": "POL", "team_a_name": "E", "team_b_id": "BRA", "team_b_name": "F", "sets_a": 3, "sets_b": 0,
                  "status": "Closed", "scheduled_at_utc": "2006-07-01T10:00:00Z", "source_url": "https://official.invalid/fivb",
                  "source_sha256": "ghi"},
                 {"match_id": "FIVB_VIS_2", "competition_name": "FIVB Men's World Championship 2006", "edition_year": 2006,
                  "gender": "M", "team_a_name": "G", "team_b_name": "H", "sets_a": 3, "sets_b": 0,
                  "status": "Closed", "scheduled_at_utc": "2006-07-02T10:00:00Z"},
                 {"match_id": "FIVB_VIS_3", "competition_name": "FIVB Men's World League 2006", "edition_year": 2006,
-                 "gender": "M", "team_a_name": "I", "team_b_name": "J", "sets_a": 3, "sets_b": 1,
+                 "gender": "M", "team_a_id": "POL", "team_a_name": "I", "team_b_id": "BRA", "team_b_name": "J", "sets_a": 3, "sets_b": 1,
                  "status": "Closed", "scheduled_at_utc": ""},
             ]).to_csv(root / "fivb_vis_matches.csv", index=False)
 
@@ -78,9 +79,13 @@ class SourceNormalizationTests(unittest.TestCase):
         international = matches.loc[matches.competition_key.eq("vnl")].iloc[0]
         self.assertEqual(international.season, "World League 2006")
         self.assertEqual(international.home_advantage_points, 0.0)
+        self.assertEqual(international.home_team_id, "POL")
+        self.assertEqual(international.away_team_id, "BRA")
         domestic = matches.loc[matches.competition_key.eq("brazil_superliga")].iloc[0]
         self.assertEqual(domestic.home_advantage_points, 50.0)
         self.assertEqual(domestic.source_url, "https://official.invalid/m1")
+        self.assertEqual(domestic.date_source_url, "https://official.invalid/roster")
+        self.assertEqual(domestic.date_source_sha256, "xyz")
         self.assertEqual(sum("path" in item for item in manifest), 4)
         self.assertEqual(len(matches.loc[matches.competition_key.eq("italy_serie_a1_women")]), 1)
         quality = next(item["normalization_quality"] for item in manifest if "normalization_quality" in item)

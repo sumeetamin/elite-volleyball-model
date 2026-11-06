@@ -12,7 +12,7 @@ CANONICAL_COLUMNS = [
     "competition_key", "sex", "season", "match_date", "home_team", "away_team",
     "home_sets", "away_sets", "match_status", "phase", "source", "source_match_id",
     "source_url", "source_sha256", "home_advantage_points", "date_precision",
-    "home_team_id", "away_team_id",
+    "home_team_id", "away_team_id", "date_source_url", "date_source_sha256",
 ]
 SUPPORTED_FILES = {
     "cbv_superliga_matches.csv", "cev_champions_league_matches.csv",
@@ -124,6 +124,7 @@ def _normalize_table(frame: pd.DataFrame, path: Path) -> pd.DataFrame:
         out = pd.DataFrame({
             "competition_key": "vnl", "sex": [x[0] for x in mapped_seasons], "season": [x[1] for x in mapped_seasons],
             "match_date": _col(source, "scheduled_at_utc", ""), "home_team": source["team_a_name"], "away_team": source["team_b_name"],
+            "home_team_id": _col(source, "team_a_id", ""), "away_team_id": _col(source, "team_b_id", ""),
             "home_sets": source["sets_a"], "away_sets": source["sets_b"],
             "match_status": _col(source, "status", "unknown"), "phase": _col(source, "phase", "tournament"),
             "source": _col(source, "source", "fivb_vis"), "source_match_id": _col(source, "match_id", ""),
