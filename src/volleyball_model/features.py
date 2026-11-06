@@ -28,6 +28,10 @@ def build_elo_features(matches: pd.DataFrame, k_factor: float = 20.0,
     data["_rating_scope"] = data["competition_key"].astype(str)
     if "sex" in data.columns:
         data["_rating_scope"] += "::" + data["sex"].fillna("unknown").astype(str)
+    for side in ("home", "away"):
+        names = data[f"{side}_team"].astype(str)
+        ids = data.get(f"{side}_team_id", pd.Series("", index=data.index)).fillna("").astype(str).str.strip()
+        data[f"_{side}_entity"] = ids.where(ids.ne(""), names)
     if "home_advantage_points" in data.columns:
         row_home_advantage = pd.to_numeric(data["home_advantage_points"], errors="coerce").fillna(home_advantage)
     else:
@@ -43,8 +47,8 @@ def build_elo_features(matches: pd.DataFrame, k_factor: float = 20.0,
     for (date, competition), day in data.groupby(["_date", "_rating_scope"], sort=True):
         updates: dict[tuple[str, str], float] = {}
         for _, row in day.iterrows():
-            home_key = (str(competition), str(row["home_team"]))
-            away_key = (str(competition), str(row["away_team"]))
+            home_key = (str(competition), str(row["_home_entity"]))
+            away_key = (str(competition), str(row["_away_entity"]))
             home_rating = ratings.get(home_key, 1500.0)
             away_rating = ratings.get(away_key, 1500.0)
             row_advantage = float(row["_home_advantage"])
@@ -89,8 +93,10 @@ def build_match_features(matches: pd.DataFrame, k_factor: float = 20.0,
     base["_rating_scope"] = base["competition_key"].astype(str)
     if "sex" in base.columns:
         base["_rating_scope"] += "::" + base["sex"].fillna("unknown").astype(str)
-    base["_home_team_key"] = base["_rating_scope"] + "::" + base["home_team"].astype(str)
-    base["_away_team_key"] = base["_rating_scope"] + "::" + base["away_team"].astype(str)
+    for side in ("home", "away"):
+        names = base[f"{side}_team"].astype(str)
+        ids = base.get(f"{side}_team_id", pd.Series("", index=base.index)).fillna("").astype(str).str.strip()
+        base[f"_{side}_team_key"] = base["_rating_scope"] + "::" + ids.where(ids.ne(""), names)
 
     elo = build_elo_features(matches, k_factor, home_advantage)
     home_schedule = base.rename(columns={"_home_team_key": "_team_key"})

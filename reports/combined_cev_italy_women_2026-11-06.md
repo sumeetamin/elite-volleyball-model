@@ -1,8 +1,8 @@
 # CEV and Italy women expansion check (2026-11-06)
 
-The local feature build combines expanded CEV and official Italy women regular-season archives with existing silver sources, cutoff 2026-11-06. It contains 17,314 dated rows and 17,215 valid outcomes. Feature CSV SHA-256: `a6a0ea4248319118fe16c1f1fe62c19a4af4a656fcbbd68b85f420f08980ba14`. Raw local league archives remain untracked pending redistribution permission.
+The local feature build combines expanded CEV and official Italy women regular-season archives with existing silver sources, cutoff 2026-11-06. It contains 17,314 dated rows and 17,215 valid outcomes. After adding official club IDs, the feature CSV SHA-256 is `777d67133d9246e426511d5d68e13f34c135a375071c6e5cd8ab9c2f3db50a57`. Raw local league archives remain untracked pending redistribution permission.
 
-The chronological final test has 2,053 matches from 2024-01-16 through 2026-11-05 UTC. Model log loss/Brier: 0.5456/0.1837; Elo: 0.5555/0.1877. Date-cluster 95% intervals for model-minus-Elo log loss and Brier include zero: [-0.0205, 0.0007] and [-0.0080, 0.0004]. This is a sensitivity run, not an untouched confirmation. The model remains below the 8/10 gate.
+The chronological final test has 2,034 paired matches from 2024-01-18 through 2026-11-05 UTC. Model log loss/Brier: 0.5521/0.1859; Elo: 0.5678/0.1925. Date-cluster 95% intervals for model-minus-Elo log loss and Brier exclude zero: [-0.0268, -0.0040] and [-0.0109, -0.0018]. This remains a sensitivity run, not an untouched confirmation. The model remains below the 8/10 gate pending broader historical/league validation and timestamp-aligned odds comparison.
 
 The dataset audit now verifies 73/274 slices (26.64%) at 10,652/10,704 valid results; this pooled figure applies only to verified slices. Italy women contributes 3,687/3,701 eligible results in 26 seasons. Of those, 3,124 have exact dates; undated results are excluded from the chronological feature build. See the dataset repository's `docs/italy-women-backfill.md` for source and season details.
 

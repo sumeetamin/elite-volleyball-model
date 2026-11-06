@@ -97,6 +97,18 @@ class EloFeatureTests(unittest.TestCase):
         self.assertEqual(features.loc[1, "home_elo"], 1500.0)
         self.assertEqual(features.loc[1, "away_elo"], 1500.0)
 
+    def test_stable_club_id_preserves_elo_across_sponsor_name_change(self):
+        matches = pd.DataFrame({
+            "competition_key": ["italy_serie_a1_women"] * 2, "sex": ["F"] * 2,
+            "match_date": pd.to_datetime(["2024-01-01", "2024-01-08"]),
+            "home_team": ["Club Sponsor A", "Club Sponsor B"], "away_team": ["Rival"] * 2,
+            "home_team_id": ["club-17", "club-17"], "away_team_id": ["club-22", "club-22"],
+            "home_sets": [3, 0], "away_sets": [0, 3],
+        })
+        features = build_elo_features(matches)
+        self.assertNotEqual(features.loc[1, "home_elo"], 1500.0)
+        self.assertNotEqual(features.loc[1, "away_elo"], 1500.0)
+
 
 class MatchFeatureTests(unittest.TestCase):
     def test_same_date_games_share_prior_form_and_rest(self):
