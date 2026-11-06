@@ -196,7 +196,11 @@ def evaluate_walk_forward(df: pd.DataFrame, date_col: str, target_col: str,
         pred["baseline_probability"] = pd.to_numeric(final_test[baseline_col], errors="coerce").to_numpy()
     summary = {"model": _metrics(final_y, final_p), "evaluated_rows": len(pred),
                "first_test_date": pred.match_date.min(), "last_test_date": pred.match_date.max(),
+               # Keep both requested and realized fractions explicit. When whole
+               # seasons are held out, rounding up to two seasons can make the
+               # actual holdout much larger than the requested date fraction.
                "final_test_fraction": final_test_fraction,
+               "realized_final_test_fraction": float(final_mask.mean()),
                "final_test_split_method": split_method,
                "final_test_seasons": final_seasons,
                "development_walk_forward": development_summary}

@@ -42,6 +42,8 @@ class FinalHoldoutTests(unittest.TestCase):
         )
         self.assertEqual(summary["final_test_split_method"], "whole_seasons")
         self.assertEqual(summary["final_test_seasons"], ["2023/24", "2024/25"])
+        self.assertEqual(summary["final_test_fraction"], 0.15)
+        self.assertAlmostEqual(summary["realized_final_test_fraction"], 0.4)
         self.assertEqual(predictions["match_date"].min(), dates[90].isoformat())
 
 
