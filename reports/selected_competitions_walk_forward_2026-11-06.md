@@ -9,7 +9,7 @@ This report is generated from the local, provenance-preserving feature matrix af
 - Same-date matches share the same prior state; domestic rows use 50 Elo home-advantage points and CEV/international rows use zero because their source ordering does not establish a home side.
 - Walk-forward development folds use a later calibration block. The final test is the latest 15% chronological date tail, with same-date grouping and a one-day embargo.
 - Final test: 2,047 paired predictions from 2024-04-02 through 2026-11-05. The realized fraction is 12.58% after filtering to completed outcomes and the as-of cutoff.
-- The source set includes PlusLiga 2001/02–2004/05 (90 dated regular-season results each) and CBV Superliga 2025/26 (132/132 men's and 131/132 women's results), extending team rating histories. Feature matrix SHA-256: `51d6d3fc0eb0f8df51c76c00eb6437567f07fe0371c1583f4471b6edaa691e56`.
+- The source set includes PlusLiga 2001/02–2005/06 (90 dated regular-season results each) and CBV Superliga 2025/26 (132/132 men's and 131/132 women's results), extending team rating histories. This refreshed as-of feature matrix contains 15,623 rows and 15,523 completed outcomes; SHA-256: `67fe9867dbf08ec638ac43d6e0be5d1eedb04070beb51315a594b2d3bd3e25b6`.
 
 ## Final test metrics
 
