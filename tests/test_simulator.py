@@ -2,7 +2,7 @@
 import math
 import unittest
 
-from volleyball_model.simulator import match_probabilities, set_win_probability
+from volleyball_model.simulator import _set_win, match_probabilities, set_win_probability
 
 
 class SimulatorTests(unittest.TestCase):
@@ -20,6 +20,17 @@ class SimulatorTests(unittest.TestCase):
     def test_invalid_probabilities_are_rejected(self):
         with self.assertRaises(ValueError):
             match_probabilities(1.01, 0.5)
+
+    def test_deuce_accounts_for_server_state_after_split_rallies(self):
+        # Exact two-state Markov solution at 2:2 in a target-3 set.
+        expected_a_serves = 0.6213592233009708
+        expected_b_serves = 0.7572815533980582
+        self.assertAlmostEqual(_set_win(2, 2, 0, 0.75, 0.6, 3), expected_a_serves, places=12)
+        self.assertAlmostEqual(_set_win(2, 2, 1, 0.75, 0.6, 3), expected_b_serves, places=12)
+
+    def test_deuce_without_any_absorbing_path_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "no absorbing path"):
+            _set_win(24, 24, 0, 1.0, 1.0, 25)
 
 
 if __name__ == "__main__":

@@ -14,7 +14,7 @@ Reserve the final chronological tail of distinct match dates before development-
 
 ## Volleyball simulator
 
-For Team A, receiving rally win probability is `p_so_a`; serving rally win probability is `1 - p_so_b`. The server retains serve after winning and loses it after losing. Sets end at target (25, fifth set 15) by two. Model first server explicitly or average the two possible starts. Dynamic programming calculates set probabilities and point/set distributions; do not cap deuce recursion with an arbitrary 0.5 fallback. Match score probabilities use a best-of-five absorbing state and distinguish fifth-set probabilities. Validate probability mass sums to one and symmetry at equal team strengths.
+For Team A, receiving rally win probability is `p_so_a`; serving rally win probability is `1 - p_so_b`. The server becomes the winner of each rally. Sets end at target (25, fifth set 15) by two. Model first server explicitly or average the two possible starts. At tied deuce, solve the two serving-state Markov equations exactly: a split pair can return to the same server or switch it. Reject degenerate side-out inputs when the deuce chain has no absorbing path; do not use an arbitrary recursion cap. The current simulator returns set-win and best-of-five match-score probabilities; it does not yet expose rally-count or full set-score distributions. Validate probability mass and symmetry at equal team strengths.
 
 ## Betting fields
 

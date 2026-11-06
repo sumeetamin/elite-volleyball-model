@@ -21,6 +21,7 @@ SUPPORTED_FILES = {
     "italy_serie_a1_women_matches.csv",
     "plusliga_m_2024_25.csv", "plusliga_m_2000_01_head_to_head.csv",
     "plusliga_m_2001_02_matches.csv", "plusliga_m_2002_03_matches.csv",
+    "plusliga_m_2003_04_matches.csv",
 }
 
 

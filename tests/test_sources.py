@@ -11,23 +11,27 @@ class SourceNormalizationTests(unittest.TestCase):
     def test_plusliga_2001_02_archive_is_supported_with_date_lineage(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
-            pd.DataFrame([{
-                "source": "official Polish league team-comparison archive",
-                "source_match_id": "1000256", "competition_key": "plusliga",
-                "competition": "Polish PlusLiga", "sex": "M", "season": "2001/02",
-                "phase": "regular_season", "match_date": "2001-09-30",
-                "home_team": "Team A", "away_team": "Team B", "home_sets": 3,
-                "away_sets": 1, "status": "completed",
-                "source_url": "https://official.invalid/match",
-                "source_sha256": "abc", "date_source_url": "https://official.invalid/team",
-                "date_source_sha256": "def",
-            }]).to_csv(root / "plusliga_m_2001_02_matches.csv", index=False)
+            for season, filename, match_id in (
+                ("2001/02", "plusliga_m_2001_02_matches.csv", "1000256"),
+                ("2003/04", "plusliga_m_2003_04_matches.csv", "1002256"),
+            ):
+                pd.DataFrame([{
+                    "source": "official Polish league team-comparison archive",
+                    "source_match_id": match_id, "competition_key": "plusliga",
+                    "competition": "Polish PlusLiga", "sex": "M", "season": season,
+                    "phase": "regular_season", "match_date": f"{season[:4]}-09-30",
+                    "home_team": "Team A", "away_team": "Team B", "home_sets": 3,
+                    "away_sets": 1, "status": "completed",
+                    "source_url": "https://official.invalid/match",
+                    "source_sha256": "abc", "date_source_url": "https://official.invalid/team",
+                    "date_source_sha256": "def",
+                }]).to_csv(root / filename, index=False)
             matches, manifest = load_match_sources([root])
-        self.assertEqual(len(matches), 1)
-        self.assertEqual(matches.iloc[0].season, "2001/02")
-        self.assertEqual(matches.iloc[0].match_status, "completed")
-        self.assertEqual(matches.iloc[0].date_source_url, "https://official.invalid/team")
-        self.assertEqual(sum("path" in item for item in manifest), 1)
+        self.assertEqual(len(matches), 2)
+        self.assertEqual(set(matches.season), {"2001/02", "2003/04"})
+        self.assertTrue(matches.match_status.eq("completed").all())
+        self.assertTrue(matches.date_source_url.eq("https://official.invalid/team").all())
+        self.assertEqual(sum("path" in item for item in manifest), 2)
 
     def test_cbv_official_page_team_ids_survive_normalization(self):
         row = pd.DataFrame([{
