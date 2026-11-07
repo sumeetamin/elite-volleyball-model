@@ -1,0 +1,141 @@
+{
+  "selected_on_validation_log_loss": "weighted_blend",
+  "input_sha256": "da5eb314dff8b7fd90858880b867898d89985e86467d9b07923f8045938d8fb7",
+  "test_rows": 3137,
+  "test_start": "2024-01-08 00:00:00+00:00",
+  "test_end": "2026-11-04 00:00:00+00:00",
+  "oof_folds": [
+    {
+      "training_end": "2010-08-06 00:00:00+00:00",
+      "prediction_start": "2010-08-08 00:00:00+00:00",
+      "prediction_end": "2014-11-05 00:00:00+00:00",
+      "rows": 2485
+    },
+    {
+      "training_end": "2014-11-05 00:00:00+00:00",
+      "prediction_start": "2014-11-07 00:00:00+00:00",
+      "prediction_end": "2018-01-21 00:00:00+00:00",
+      "rows": 3321
+    },
+    {
+      "training_end": "2018-01-20 00:00:00+00:00",
+      "prediction_start": "2018-01-22 00:00:00+00:00",
+      "prediction_end": "2021-02-12 00:00:00+00:00",
+      "rows": 3213
+    }
+  ],
+  "weighted_blend_weights": {
+    "logistic": 0.3,
+    "gradient_boosting": 0.6,
+    "random_forest": 0.1
+  },
+  "models": {
+    "soft_voting": {
+      "validation": {
+        "n": 3042,
+        "accuracy": 0.7445759368836292,
+        "log_loss": 0.5238252846700462,
+        "brier": 0.1744144789855798,
+        "roc_auc": 0.8146631509097895,
+        "ece_10_equal_width": 0.017937961532646096
+      },
+      "test": {
+        "n": 3137,
+        "accuracy": 0.7252151737328658,
+        "log_loss": 0.5480566428368031,
+        "brier": 0.18477696757609882,
+        "roc_auc": 0.7948138360663213,
+        "ece_10_equal_width": 0.030114919481940557
+      }
+    },
+    "weighted_blend": {
+      "validation": {
+        "n": 3042,
+        "accuracy": 0.7416173570019724,
+        "log_loss": 0.5236776796813287,
+        "brier": 0.17439624977531157,
+        "roc_auc": 0.8146797401599554,
+        "ece_10_equal_width": 0.014215252528416954
+      },
+      "test": {
+        "n": 3137,
+        "accuracy": 0.7248963978323238,
+        "log_loss": 0.5482121072230595,
+        "brier": 0.18473343361961397,
+        "roc_auc": 0.7949754381165912,
+        "ece_10_equal_width": 0.0334709853371737
+      }
+    },
+    "chronological_stacking": {
+      "validation": {
+        "n": 3042,
+        "accuracy": 0.7406311637080868,
+        "log_loss": 0.5260438708009463,
+        "brier": 0.17485363249499547,
+        "roc_auc": 0.8142226626619634,
+        "ece_10_equal_width": 0.018549031476785084
+      },
+      "test": {
+        "n": 3137,
+        "accuracy": 0.7264902773350335,
+        "log_loss": 0.5496398269571202,
+        "brier": 0.184903649480453,
+        "roc_auc": 0.7955042065380036,
+        "ece_10_equal_width": 0.023669695898648604
+      }
+    }
+  },
+  "selected_accuracy_intervals": {
+    "accuracy": [
+      0.7102931515736334,
+      0.7404839151522409
+    ],
+    "log_loss": [
+      0.5306015758760048,
+      0.5642863958273223
+    ],
+    "brier": [
+      0.17757116720372856,
+      0.19118894515906096
+    ],
+    "ece_10_equal_width": [
+      0.02526652546284337,
+      0.05153513468870845
+    ]
+  },
+  "selected_minus_gradient_boosting_intervals": {
+    "accuracy_diff": [
+      -0.006386360297276669,
+      0.0018028340143776043
+    ],
+    "log_loss_diff": [
+      -0.003097721139490711,
+      -0.0006937835968775153
+    ],
+    "brier_diff": [
+      -0.0011058733682782179,
+      -0.00020907959792353
+    ],
+    "ece_10_equal_width_diff": [
+      -0.0038153121063426655,
+      0.008286248383824312
+    ]
+  },
+  "gradient_boosting_test": {
+    "n": 3137,
+    "accuracy": 0.7274466050366593,
+    "log_loss": 0.5500458237599527,
+    "brier": 0.18537571639461126,
+    "roc_auc": 0.7936240053536275,
+    "ece_10_equal_width": 0.03075063732193307
+  },
+  "elo_test": {
+    "n": 3137,
+    "accuracy": 0.7070449474019764,
+    "log_loss": 0.5666876005785947,
+    "brier": 0.19191433916929257,
+    "roc_auc": 0.7860370536811889,
+    "ece_10_equal_width": 0.0586855839583448
+  },
+  "limitations": "Retrospective, repeatedly examined historical test period; requires a new prospective evaluation. Selection uses validation log loss, not test accuracy. Stacking meta learner trained on earlier out-of-fold predictions only."
+}

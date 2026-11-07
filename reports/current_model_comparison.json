@@ -1,0 +1,95 @@
+{
+  "selected_on_validation_log_loss": "gradient_boosting",
+  "input_sha256": "da5eb314dff8b7fd90858880b867898d89985e86467d9b07923f8045938d8fb7",
+  "usable_completed_rows": 21094,
+  "excluded_rows": 1679,
+  "train_rows": 14896,
+  "validation_rows": 3042,
+  "refit_rows": 17942,
+  "test_rows": 3137,
+  "test_start": "2024-01-08 00:00:00+00:00",
+  "test_end": "2026-11-04 00:00:00+00:00",
+  "models": {
+    "logistic": {
+      "validation": {
+        "n": 3042,
+        "accuracy": 0.739973701512163,
+        "log_loss": 0.5268192679841115,
+        "brier": 0.17568896481548898,
+        "roc_auc": 0.8118338106380749,
+        "ece_10_equal_width": 0.01977124150106728
+      },
+      "test": {
+        "n": 3137,
+        "accuracy": 0.7261715014344916,
+        "log_loss": 0.5482842965362863,
+        "brier": 0.18455619174958288,
+        "roc_auc": 0.7955819546276803,
+        "ece_10_equal_width": 0.026357092707456845
+      }
+    },
+    "gradient_boosting": {
+      "validation": {
+        "n": 3042,
+        "accuracy": 0.7412886259040106,
+        "log_loss": 0.5242400502268342,
+        "brier": 0.17452599021398862,
+        "roc_auc": 0.8144826336744316,
+        "ece_10_equal_width": 0.017067274296620805
+      },
+      "test": {
+        "n": 3137,
+        "accuracy": 0.7274466050366593,
+        "log_loss": 0.5500458237599527,
+        "brier": 0.18537571639461126,
+        "roc_auc": 0.7936240053536275,
+        "ece_10_equal_width": 0.03075063732193307
+      }
+    },
+    "random_forest": {
+      "validation": {
+        "n": 3042,
+        "accuracy": 0.742603550295858,
+        "log_loss": 0.525803623909321,
+        "brier": 0.17495530804955467,
+        "roc_auc": 0.8136935528935144,
+        "ece_10_equal_width": 0.02171935735303802
+      },
+      "test": {
+        "n": 3137,
+        "accuracy": 0.7248963978323238,
+        "log_loss": 0.5511735878067607,
+        "brier": 0.18617658600115033,
+        "roc_auc": 0.7915476021837851,
+        "ece_10_equal_width": 0.029010518218185403
+      }
+    }
+  },
+  "elo_test": {
+    "n": 3137,
+    "accuracy": 0.7070449474019764,
+    "log_loss": 0.5666876005785947,
+    "brier": 0.19191433916929257,
+    "roc_auc": 0.7860370536811889,
+    "ece_10_equal_width": 0.0586855839583448
+  },
+  "selected_test_intervals": {
+    "accuracy": [
+      0.7131904634023264,
+      0.7426584354665782
+    ],
+    "log_loss": [
+      0.5322680647307051,
+      0.5662160581735664
+    ],
+    "brier": [
+      0.1780055231470216,
+      0.19201641521817692
+    ],
+    "ece_10_equal_width": [
+      0.022780485096900976,
+      0.050195976730420554
+    ]
+  },
+  "limitations": "Retrospective comparison; historical test dates have been inspected in earlier development. No prospective accuracy or profitability claim. Features update from earlier observed results; model parameters fixed throughout test."
+}

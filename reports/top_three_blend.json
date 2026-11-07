@@ -1,0 +1,80 @@
+{
+  "selected_on_validation_log_loss": "validation_weighted_blend",
+  "input_sha256": "da5eb314dff8b7fd90858880b867898d89985e86467d9b07923f8045938d8fb7",
+  "test_rows": 3137,
+  "models": {
+    "equal_blend": {
+      "weights": {
+        "gradient_boosting": 0.3333333333333333,
+        "catboost": 0.3333333333333333,
+        "lightgbm": 0.3333333333333333
+      },
+      "validation": {
+        "n": 3042,
+        "accuracy": 0.7412886259040106,
+        "log_loss": 0.5238507303239474,
+        "brier": 0.17438042178458593,
+        "roc_auc": 0.8146033422973492,
+        "ece_10_equal_width": 0.014282004442391135
+      },
+      "test": {
+        "n": 3137,
+        "accuracy": 0.7277653809372011,
+        "log_loss": 0.5494649198322495,
+        "brier": 0.18528694467843765,
+        "roc_auc": 0.7937748203652776,
+        "ece_10_equal_width": 0.02645592961992039
+      }
+    },
+    "validation_weighted_blend": {
+      "weights": {
+        "gradient_boosting": 0.35,
+        "catboost": 0.15,
+        "lightgbm": 0.5
+      },
+      "validation": {
+        "n": 3042,
+        "accuracy": 0.740302432610125,
+        "log_loss": 0.5238212978795191,
+        "brier": 0.17437470538300676,
+        "roc_auc": 0.8146797401599553,
+        "ece_10_equal_width": 0.015306698660544165
+      },
+      "test": {
+        "n": 3137,
+        "accuracy": 0.7287217086388269,
+        "log_loss": 0.5496770267533625,
+        "brier": 0.18536748462832484,
+        "roc_auc": 0.7936465970760206,
+        "ece_10_equal_width": 0.028123730974565418
+      }
+    }
+  },
+  "previous_gradient_boosting": {
+    "n": 3137,
+    "accuracy": 0.7274466050366593,
+    "log_loss": 0.5500458237599527,
+    "brier": 0.18537571639461126,
+    "roc_auc": 0.7936240053536275,
+    "ece_10_equal_width": 0.03075063732193307
+  },
+  "paired_intervals_vs_gradient_boosting": {
+    "accuracy_diff": [
+      -0.0022259755824215383,
+      0.0052951485556700225
+    ],
+    "log_loss_diff": [
+      -0.0012784181172623781,
+      0.0006232582321671925
+    ],
+    "brier_diff": [
+      -0.0003604601516402586,
+      0.0003327389958961694
+    ],
+    "ece_10_equal_width_diff": [
+      -0.008652221062911615,
+      0.005449129919970664
+    ]
+  },
+  "limitations": "Exploratory retrospective result: these three model families were chosen after inspecting earlier test results. Although weights use earlier validation only, this is not an untouched test or a prospective performance estimate."
+}

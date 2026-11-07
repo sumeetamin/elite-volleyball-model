@@ -1,0 +1,239 @@
+{
+  "selected_on_validation_log_loss": "lightgbm",
+  "input_sha256": "da5eb314dff8b7fd90858880b867898d89985e86467d9b07923f8045938d8fb7",
+  "features": [
+    "elo_diff",
+    "home_advantage_points",
+    "rest_days_diff",
+    "form_diff",
+    "set_margin_diff"
+  ],
+  "train_rows": 14896,
+  "validation_rows": 3042,
+  "refit_rows": 17942,
+  "test_rows": 3137,
+  "test_start": "2024-01-08 00:00:00+00:00",
+  "test_end": "2026-11-04 00:00:00+00:00",
+  "versions": {
+    "xgboost": "3.2.0",
+    "catboost": "1.2.10",
+    "lightgbm": "4.6.0"
+  },
+  "models": {
+    "xgboost": {
+      "validation_trials": [
+        {
+          "depth": 2,
+          "metrics": {
+            "n": 3042,
+            "accuracy": 0.7396449704142012,
+            "log_loss": 0.5242167750582786,
+            "brier": 0.17448462545871735,
+            "roc_auc": 0.8145657982048685,
+            "ece_10_equal_width": 0.013962044635938232
+          }
+        },
+        {
+          "depth": 4,
+          "metrics": {
+            "n": 3042,
+            "accuracy": 0.7445759368836292,
+            "log_loss": 0.5242033746898037,
+            "brier": 0.17449897527694702,
+            "roc_auc": 0.8142453637411379,
+            "ece_10_equal_width": 0.013731420804292738
+          }
+        },
+        {
+          "depth": 6,
+          "metrics": {
+            "n": 3042,
+            "accuracy": 0.742603550295858,
+            "log_loss": 0.5253989739748098,
+            "brier": 0.17498630285263062,
+            "roc_auc": 0.8129086194251388,
+            "ece_10_equal_width": 0.01801362717958911
+          }
+        }
+      ],
+      "selected_depth": 4,
+      "validation": {
+        "n": 3042,
+        "accuracy": 0.7445759368836292,
+        "log_loss": 0.5242033746898037,
+        "brier": 0.17449897527694702,
+        "roc_auc": 0.8142453637411379,
+        "ece_10_equal_width": 0.013731420804292738
+      },
+      "test": {
+        "n": 3137,
+        "accuracy": 0.7255339496334077,
+        "log_loss": 0.5503962872265691,
+        "brier": 0.18563592433929443,
+        "roc_auc": 0.7930913698806343,
+        "ece_10_equal_width": 0.02548753535971732
+      }
+    },
+    "catboost": {
+      "validation_trials": [
+        {
+          "depth": 2,
+          "metrics": {
+            "n": 3042,
+            "accuracy": 0.7412886259040106,
+            "log_loss": 0.5253009422060296,
+            "brier": 0.17479072110821023,
+            "roc_auc": 0.8137871948451088,
+            "ece_10_equal_width": 0.016708338805155886
+          }
+        },
+        {
+          "depth": 4,
+          "metrics": {
+            "n": 3042,
+            "accuracy": 0.744904667981591,
+            "log_loss": 0.5244743780394556,
+            "brier": 0.17460969519912561,
+            "roc_auc": 0.8138400185101107,
+            "ece_10_equal_width": 0.013091409339464588
+          }
+        },
+        {
+          "depth": 6,
+          "metrics": {
+            "n": 3042,
+            "accuracy": 0.742603550295858,
+            "log_loss": 0.5248498295476218,
+            "brier": 0.17479243411349923,
+            "roc_auc": 0.8132624506688086,
+            "ece_10_equal_width": 0.011099131500654655
+          }
+        }
+      ],
+      "selected_depth": 4,
+      "validation": {
+        "n": 3042,
+        "accuracy": 0.744904667981591,
+        "log_loss": 0.5244743780394556,
+        "brier": 0.17460969519912561,
+        "roc_auc": 0.8138400185101107,
+        "ece_10_equal_width": 0.013091409339464588
+      },
+      "test": {
+        "n": 3137,
+        "accuracy": 0.7264902773350335,
+        "log_loss": 0.5493504083598998,
+        "brier": 0.1852704630056298,
+        "roc_auc": 0.7936927981659593,
+        "ece_10_equal_width": 0.023648855056902167
+      }
+    },
+    "lightgbm": {
+      "validation_trials": [
+        {
+          "depth": 2,
+          "metrics": {
+            "n": 3042,
+            "accuracy": 0.7396449704142012,
+            "log_loss": 0.5240679421636105,
+            "brier": 0.174481221469538,
+            "roc_auc": 0.8145775853036705,
+            "ece_10_equal_width": 0.015725755837004023
+          }
+        },
+        {
+          "depth": 4,
+          "metrics": {
+            "n": 3042,
+            "accuracy": 0.7432610124917817,
+            "log_loss": 0.5248395675553312,
+            "brier": 0.1748073219423827,
+            "roc_auc": 0.8134285614500751,
+            "ece_10_equal_width": 0.012653913764171241
+          }
+        },
+        {
+          "depth": 6,
+          "metrics": {
+            "n": 3042,
+            "accuracy": 0.7445759368836292,
+            "log_loss": 0.5253224541226019,
+            "brier": 0.17507568305078594,
+            "roc_auc": 0.8126944871302343,
+            "ece_10_equal_width": 0.015597533641285933
+          }
+        }
+      ],
+      "selected_depth": 2,
+      "validation": {
+        "n": 3042,
+        "accuracy": 0.7396449704142012,
+        "log_loss": 0.5240679421636105,
+        "brier": 0.174481221469538,
+        "roc_auc": 0.8145775853036705,
+        "ece_10_equal_width": 0.015725755837004023
+      },
+      "test": {
+        "n": 3137,
+        "accuracy": 0.7264902773350335,
+        "log_loss": 0.5502372035256761,
+        "brier": 0.18563344104258084,
+        "roc_auc": 0.7930439476165122,
+        "ece_10_equal_width": 0.024763305411670385
+      }
+    }
+  },
+  "previous_gradient_boosting": {
+    "n": 3137,
+    "accuracy": 0.7274466050366593,
+    "log_loss": 0.5500458237599527,
+    "brier": 0.18537571639461126,
+    "roc_auc": 0.7936240053536275,
+    "ece_10_equal_width": 0.03075063732193307
+  },
+  "elo": {
+    "n": 3137,
+    "accuracy": 0.7070449474019764,
+    "log_loss": 0.5666876005785947,
+    "brier": 0.19191433916929257,
+    "roc_auc": 0.7860370536811889,
+    "ece_10_equal_width": 0.0586855839583448
+  },
+  "selected_intervals": {
+    "accuracy": [
+      0.71132940011132,
+      0.7421741004188425
+    ],
+    "log_loss": [
+      0.533520671428293,
+      0.5657886630832613
+    ],
+    "brier": [
+      0.1784597094317638,
+      0.19229030334553693
+    ],
+    "ece_10_equal_width": [
+      0.01925917703345586,
+      0.045164329237473634
+    ]
+  },
+  "selected_minus_previous_gradient_boosting_intervals": {
+    "accuracy_diff": [
+      -0.005931610872879978,
+      0.00500166070307753
+    ],
+    "log_loss_diff": [
+      -0.0013544830196374007,
+      0.0018593656301971206
+    ],
+    "brier_diff": [
+      -0.0003394385567315611,
+      0.0008468913416897912
+    ],
+    "ece_10_equal_width_diff": [
+      -0.012418699391278128,
+      0.004065485938697983
+    ]
+  },
+  "limitations": "Retrospective test period already examined in previous experiments. Depth and family selection use earlier validation log loss only. No prospective performance or profitability claim."
+}

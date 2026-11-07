@@ -28,6 +28,20 @@ SUPPORTED_FILES = {
     "plusliga_m_2008_09_matches.csv", "plusliga_m_2009_10_matches.csv",
     "plusliga_m_2010_11_matches.csv", "plusliga_m_2011_12_matches.csv", "plusliga_m_2012_13_matches.csv", "plusliga_m_2013_14_matches.csv",
 }
+SUPPORTED_FILES |= {f"plusliga_m_{year}_{(year + 1) % 100:02d}_matches.csv" for year in range(2014, 2026)}
+SUPPORTED_FILES |= {f"tauron_liga_w_{year}_{(year + 1) % 100:02d}_matches.csv" for year in range(2008, 2026)}
+SUPPORTED_FILES.add("fivb_lineage_matches.csv")
+SUPPORTED_FILES |= {
+    "fivb_legacy_world_league_2002_03_matches.csv",
+    "fivb_legacy_world_grand_prix_2002_03_matches.csv",
+    "fivb_legacy_world_league_2004_matches.csv",
+}
+SUPPORTED_FILES |= {f"cbv_superliga_2016_17_{sex}.csv" for sex in ("m", "w")}
+SUPPORTED_FILES |= {
+    f"brazil_superliga_{sex}_{season}_uol.csv"
+    for sex in ("m", "w")
+    for season in ("1999_2000", "2004_05", "2005_06", "2006_07", "2008_09")
+}
 
 
 def _col(frame: pd.DataFrame, name: str, default: object) -> pd.Series:
@@ -119,7 +133,45 @@ def _normalize_table(frame: pd.DataFrame, path: Path) -> pd.DataFrame:
                 lambda value: "range_end" if re.match(r"^\d{1,2}(?:\./\d{1,2})+\.?\s+\d{1,2}\.\d{4}$", str(value).strip()) else "archive_date"
             ),
         })
-    elif {"competition_name", "team_a_name", "team_b_name", "sets_a", "sets_b"} <= columns:
+    elif {"competition_key", "competition_name", "team_a_name", "team_b_name", "sets_a", "sets_b"} <= columns:
+        if path.name.startswith("fivb_legacy_"):
+            out = pd.DataFrame({
+                "competition_key": frame["competition_key"],
+                "sex": frame["gender"].astype(str).str.upper().replace({"W": "F"}),
+                "season": frame["season"], "match_date": _col(frame, "match_date", ""),
+                "home_team": frame["team_a_name"], "away_team": frame["team_b_name"],
+                "home_sets": frame["sets_a"], "away_sets": frame["sets_b"],
+                "match_status": "completed", "phase": _col(frame, "phase", "tournament"),
+                "source": _col(frame, "source", "AIFVB Historical Volleyball Archive"),
+                "source_match_id": frame["match_id"], "source_url": _col(frame, "source_url", ""),
+                "source_sha256": _col(frame, "source_sha256", ""), "home_advantage_points": 0.0,
+                "date_precision": "event_date",
+            })
+            for column in CANONICAL_COLUMNS:
+                if column not in out:
+                    out[column] = ""
+        else:
+            kept = []
+            seasons = []
+            for _, row in frame.iterrows():
+                mapped = _fivb_lineage(row)
+                kept.append(mapped is not None)
+                seasons.append(mapped)
+            source = frame.loc[kept].copy().reset_index(drop=True)
+            mapped_seasons = [season for season, keep in zip(seasons, kept) if keep]
+            out = pd.DataFrame({
+            "competition_key": "vnl", "sex": [x[0] for x in mapped_seasons], "season": [x[1] for x in mapped_seasons],
+            "match_date": _col(source, "scheduled_at_utc", ""), "home_team": source["team_a_name"], "away_team": source["team_b_name"],
+            "home_team_id": _col(source, "team_a_id", ""), "away_team_id": _col(source, "team_b_id", ""),
+            "home_sets": source["sets_a"], "away_sets": source["sets_b"],
+            "match_status": _col(source, "status", "unknown"), "phase": _col(source, "phase", "tournament"),
+            "source": _col(source, "source", "fivb_vis"), "source_match_id": _col(source, "match_id", ""),
+            "source_url": _col(source, "source_url", ""), "source_sha256": _col(source, "source_sha256", ""),
+            "home_advantage_points": 0.0,
+            "date_precision": "timestamp_utc",
+            })
+    elif ({"competition_name", "team_a_name", "team_b_name", "sets_a", "sets_b"} <= columns
+          and "competition_key" not in columns):
         kept = []
         seasons = []
         for _, row in frame.iterrows():
@@ -136,9 +188,19 @@ def _normalize_table(frame: pd.DataFrame, path: Path) -> pd.DataFrame:
             "match_status": _col(source, "status", "unknown"), "phase": _col(source, "phase", "tournament"),
             "source": _col(source, "source", "fivb_vis"), "source_match_id": _col(source, "match_id", ""),
             "source_url": _col(source, "source_url", ""), "source_sha256": _col(source, "source_sha256", ""),
-            "home_advantage_points": 0.0,
-            "date_precision": "timestamp_utc",
+            "home_advantage_points": 0.0, "date_precision": "timestamp_utc",
         })
+    elif ({"competition_key", "season", "sex", "home_team", "away_team", "home_sets", "away_sets"} <= columns
+          and ("match_status" in columns or "status" in columns)):
+        out = frame.copy()
+        out["match_status"] = _col(frame, "match_status", _col(frame, "status", "unknown"))
+        out["match_date"] = _col(frame, "match_date", "")
+        out["source"] = _col(frame, "source", path.name)
+        out["source_match_id"] = _col(frame, "source_match_id", _col(frame, "match_id", ""))
+        out["source_url"] = _col(frame, "source_url", "")
+        out["source_sha256"] = _col(frame, "source_sha256", "")
+        out["phase"] = _col(frame, "phase", "regular_season")
+        out["home_advantage_points"] = 0.0
     else:
         return pd.DataFrame(columns=CANONICAL_COLUMNS)
     for column in CANONICAL_COLUMNS:
